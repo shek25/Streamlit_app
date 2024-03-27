@@ -7,29 +7,6 @@ from object_det_app import *
 from Pedestrian import *
 from speed_modular import *
 
-def main_func_image(image, model, confidence):
-    # Placeholder for image processing function for street name detection
-    # Implement street name detection logic for images here
-    # For example: process the image through the model and return detected text
-    results = model(image)
-    return "Detected street name"  # Replace with actual detection results
-
-def main_func_ped_image(image, confidence, margin):
-    # Placeholder for pedestrian detection on image
-    # Implement pedestrian detection logic for images here
-    # For example: process the image through the model and return pedestrian count
-    results = model(image)
-    return "Detected pedestrians"  # Replace with actual detection results
-
-def alert_on_image(image, model, class_type, confidence):
-    # Placeholder for alert logic on image
-    # Implement alert logic here, such as detecting specific object classes
-    results = model(image)
-    for detection in results:
-        if detection["class"] == class_type:  # This is a simplified example
-            return f"Alert: {class_type} detected."
-    return "No alerts"
-
 im = Image.open('eye.png')
 
 # Replace the relative path to your weight file
@@ -47,30 +24,18 @@ st.set_page_config(
 with st.sidebar:
     st.header("Image/Video Config")  # Adding header to sidebar
     # Adding file uploader to sidebar for selecting videos
-    uploaded_file = st.file_uploader("Choose a video or image...", type=["mp4", "mov", "png"])
+    uploaded_file = st.file_uploader("Choose a video/image...", type=["mp4","mov","jpg"])
     temporary_location = None
 
     if uploaded_file is not None:
-        #Get the file extension and construct the temporary filename accordingly
-        file_extension = uploaded_file.name.split('.')[-1].lower()
-        temporary_location = f"temp_file.{file_extension}"
-        
+        temporary_location = "testout_simple.mp4"
         try:
-            with open(temporary_location, 'wb') as out:
-                out.write(uploaded_file.read())  # Read bytes into the temporary file
+            with open(temporary_location, 'wb') as out:  ## Open temporary file as bytes
+                out.write(uploaded_file.read())  ## Read bytes into file
         except PermissionError:
             st.error("Permission denied to write the temporary file. Please check your permissions.")
         except Exception as e:
             st.error(f"Error saving uploaded file: {e}")
-            
-        # temporary_location = "testout_simple.mp4"
-        # try:
-        #     with open(temporary_location, 'wb') as out:  ## Open temporary file as bytes
-        #         out.write(uploaded_file.read())  ## Read bytes into file
-        # except PermissionError:
-        #     st.error("Permission denied to write the temporary file. Please check your permissions.")
-        # except Exception as e:
-        #     st.error(f"Error saving uploaded file: {e}")
 
     det_type = st.radio(
         "Select Detection Type",
@@ -119,7 +84,6 @@ if uploaded_file is not None and not st.session_state.video_uploaded:
 
 # Header Section
 st.title("Third Eye Vision")
-# st.header("Upload the video or image file and click on the start detection")
 
 selected = option_menu(
     menu_title=None,
@@ -131,41 +95,37 @@ selected = option_menu(
 )
 
 if selected == "HOME":
-    st.header("Upload the video or image file and click on the start detection")
+    st.header("Upload the video/Image file and click on the start detection")
 
-    # File processing
-    if uploaded_file is not None:
+    # If a video has been uploaded and detected, start object detection
+    if st.session_state.video_uploaded:
 
-        # Check file extension and process accordingly
-        if file_extension in ['mov', 'mp4']:
-            if st.sidebar.button('Start Detection'):
-                vid_cap = cv2.VideoCapture(temporary_location)
+        if det_type == "Street_Name" and st.sidebar.button('Start Detection'):
+            vid_cap = cv2.VideoCapture(temporary_location)
 
-                # Video detection based on type
-                if det_type == "Street_Name":
-                    detected_text = main_func(vid_cap, model, confidence)
-                    st.write("Most common text:", detected_text)
-                elif det_type == "Pedestrian":
-                    main_func_ped(vid_cap, confidence, margin)
-                elif det_type == "Alert":
-                    alert_message = "Alert logic for video not yet implemented."  # Placeholder
-                    st.write(alert_message)
+            detected_text = main_func(vid_cap, model, confidence)
 
-        elif file_extension == 'png':
-            if st.sidebar.button('Start Detection'):
-                # If the image file is loaded, open it
-                image = Image.open(temporary_location)
+            # Display the most common text
+            st.write("Most common text:", detected_text)
 
-                # Image detection based on type
-                if det_type == "Street_Name":
-                    detected_text = main_func_image(image, model, confidence)
-                    st.write("Detected text:", detected_text)
-                elif det_type == "Pedestrian":
-                    pedestrian_message = main_func_ped_image(image, confidence, margin)
-                    st.write(pedestrian_message)
-                elif det_type == "Alert":
-                    alert_message = alert_on_image(image, model, class_type, confidence)
-                    st.write(alert_message)
+            audio_html = speak(detected_text)
+
+        if det_type == "Pedestrian" and st.sidebar.button('Start Detection'):
+            vid_cap = cv2.VideoCapture(temporary_location)
+
+            main_func_ped(vid_cap, confidence, margin)
+        
+        if det_type == "Alert" and st.sidebar.button('Start Detection'):
+            vid_cap = cv2.VideoCapture(temporary_location)
+            class_items = ['bicycle', 'car', 'motorcycle', 'bus', 'truck']
+            assigned_numbers = [1, 2, 3, 5, 7]
+
+            # Creating a dictionary to map items to their assigned numbers
+            item_to_number = dict(zip(class_items, assigned_numbers))
+            class_no = item_to_number.get(class_type)
+
+            main_func_alert(vid_cap,user_conf_value=confidence, margin=margin, user_class_id=class_no, user_fps_value=FPS)
+
 
 if selected == "ABOUT":
 
