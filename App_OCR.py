@@ -47,7 +47,7 @@ st.set_page_config(
 with st.sidebar:
     st.header("Image/Video Config")  # Adding header to sidebar
     # Adding file uploader to sidebar for selecting videos
-    uploaded_file = st.file_uploader(Choose a video or image...", type=["mp4", "mov", "png"])
+    uploaded_file = st.file_uploader("Choose a video or image...", type=["mp4", "mov", "png"])
     temporary_location = None
 
     if uploaded_file is not None:
@@ -119,7 +119,7 @@ if uploaded_file is not None and not st.session_state.video_uploaded:
 
 # Header Section
 st.title("Third Eye Vision")
-st.header("Upload the video or image file and click on the start detection")
+# st.header("Upload the video or image file and click on the start detection")
 
 selected = option_menu(
     menu_title=None,
