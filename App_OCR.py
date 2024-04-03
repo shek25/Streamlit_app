@@ -6,14 +6,12 @@ import cv2
 from object_det_app import *
 from Pedestrian import *
 from speed_modular import *
-
+import pyrebase
+from datetime import datetime 
 import ssl
 import certifi
 ssl._create_default_https_context = ssl._create_stdlib_context
 
-import pyrebase
-import streamlit as st
-from datetime import datetime 
 
 firebaseConfig = {
     'apiKey': "AIzaSyCHGqRo7Kqxpm4utKIQddOlKIsmC7R9WTI",
@@ -42,6 +40,15 @@ choice = st.sidebar.selectbox('Login/Signup', ['Login', 'Sign up'])
 
 email = st.sidebar.text_input('Please enter your email address')
 password = st.sidebar.text_input('Please enter your password', type='password')
+
+if choice == 'Signup':
+    handle = st.sidebar.text_input("Enter your username", value='Default')
+    submit = st.sidebar.button('Create my account')
+    
+    if submit:
+        user = auth.create_user_with_email_and_password(email,password)
+        st.success('Your Account is created Successfully')
+        st.balloons()
 
 # Ensure this is placed before any code that makes HTTPS requests
 # For example, before the import statement of your EasyOCR module
