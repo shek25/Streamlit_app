@@ -6,6 +6,61 @@ import cv2
 from object_det_app import *
 from Pedestrian import *
 from speed_modular import *
+import pyrebase
+import requests
+
+
+# Streamlit app
+st.sidebar.title("Our Community App")
+
+# Authentication
+choice = st.sidebar.selectbox('Login/Signup', ['Login', 'Sign up'])
+
+email = st.sidebar.text_input('Please enter your email address')
+password = st.sidebar.text_input('Please enter your password', type='password')
+
+firebase_config = {'apiKey': "AIzaSyCHGqRo7Kqxpm4utKIQddOlKIsmC7R9WTI",
+    'authDomain': "third-eye-ed866.firebaseapp.com",
+    'projectId': "third-eye-ed866",
+    'databaseURL': "https://third-eye-ed866-default-rtdb.firebaseio.com/",
+    'storageBucket': "third-eye-ed866.appspot.com",
+    'messagingSenderId': "432801718461",
+    'appId': "1:432801718461:web:9de6394feefac3ca3817d4",
+    'measurementId': "G-0ZKHV63176"
+    # ... other config ...
+}
+
+if choice == 'Signup':
+    handle = st.sidebar.text_input("Enter your username", value='Default')
+    submit = st.sidebar.button('Create my account')
+    
+    if submit:
+        signup_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={firebase_config['apiKey']}"
+        user_details = {
+            'email': email,
+            'password': password,
+            'returnSecureToken': True,
+        }
+        response = requests.post(signup_url, data=user_details)
+        if response.ok:
+            user_info = response.json()
+            st.success('Your Account is created Successfully')
+            st.balloons()
+            # Here you would use Firebase Admin SDK to interact with your database
+            # db.child(user_info['localId']).child("Handle").set(handle)
+            # db.child(user_info['localId']).child("ID").set(user_info['localId'])
+            st.info('Login via login drop down')
+        else:
+            st.error('Error creating account.')
+
+# Ensure this is placed before any code that makes HTTPS requests
+# For example, before the import statement of your EasyOCR module
+
+
+# import requests
+# requests.packages.urllib3.disable_warnings()
+
+
 
 im = Image.open('eye.png')
 
