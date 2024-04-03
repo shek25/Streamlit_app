@@ -6,3 +6,5 @@ pyttsx3
 omegaconf
 Easyocr
 streamlit-option-menu
+firebase-admin
+
