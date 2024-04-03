@@ -6,58 +6,6 @@ import cv2
 from object_det_app import *
 from Pedestrian import *
 from speed_modular import *
-import pyrebase
-from datetime import datetime 
-import ssl
-import certifi
-ssl._create_default_https_context = ssl._create_stdlib_context
-
-
-firebaseConfig = {
-    'apiKey': "AIzaSyCHGqRo7Kqxpm4utKIQddOlKIsmC7R9WTI",
-    'authDomain': "third-eye-ed866.firebaseapp.com",
-    'projectId': "third-eye-ed866",
-    'databaseURL': "https://third-eye-ed866-default-rtdb.firebaseio.com/",
-    'storageBucket': "third-eye-ed866.appspot.com",
-    'messagingSenderId': "432801718461",
-    'appId': "1:432801718461:web:9de6394feefac3ca3817d4",
-    'measurementId': "G-0ZKHV63176"
-}
-
-# Firebase Authentication 
-firebase = pyrebase.initialize_app(firebaseConfig)
-auth = firebase.auth()
-
-# Database 
-db = firebase.database()
-storage = firebase.storage()
-
-st.sidebar.title("Our Community App")
-
-# Authentication
-
-choice = st.sidebar.selectbox('Login/Signup', ['Login', 'Sign up'])
-
-email = st.sidebar.text_input('Please enter your email address')
-password = st.sidebar.text_input('Please enter your password', type='password')
-
-if choice == 'Signup':
-    handle = st.sidebar.text_input("Enter your username", value='Default')
-    submit = st.sidebar.button('Create my account')
-    
-    if submit:
-        user = auth.create_user_with_email_and_password(email,password)
-        st.success('Your Account is created Successfully')
-        st.balloons()
-
-# Ensure this is placed before any code that makes HTTPS requests
-# For example, before the import statement of your EasyOCR module
-
-
-# import requests
-# requests.packages.urllib3.disable_warnings()
-
-
 
 im = Image.open('eye.png')
 
