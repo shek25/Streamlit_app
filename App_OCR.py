@@ -7,6 +7,51 @@ from object_det_app import *
 from Pedestrian import *
 from speed_modular import *
 
+import ssl
+import certifi
+ssl._create_default_https_context = ssl._create_stdlib_context
+
+import pyrebase
+import streamlit as st
+from datetime import datetime 
+
+firebaseConfig = {
+    'apiKey': "AIzaSyCHGqRo7Kqxpm4utKIQddOlKIsmC7R9WTI",
+    'authDomain': "third-eye-ed866.firebaseapp.com",
+    'projectId': "third-eye-ed866",
+    'databaseURL': "https://third-eye-ed866-default-rtdb.firebaseio.com/",
+    'storageBucket': "third-eye-ed866.appspot.com",
+    'messagingSenderId': "432801718461",
+    'appId': "1:432801718461:web:9de6394feefac3ca3817d4",
+    'measurementId': "G-0ZKHV63176"
+}
+
+# Firebase Authentication 
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
+
+# Database 
+db = firebase.database()
+storage = firebase.storage()
+
+st.sidebar.title("Our Community App")
+
+# Authentication
+
+choice = st.sidebar.selectbox('Login/Signup', ['Login', 'Sign up'])
+
+email = st.sidebar.text_input('Please enter your email address')
+password = st.sidebar.text_input('Please enter your password', type='password')
+
+# Ensure this is placed before any code that makes HTTPS requests
+# For example, before the import statement of your EasyOCR module
+
+
+# import requests
+# requests.packages.urllib3.disable_warnings()
+
+
+
 im = Image.open('eye.png')
 
 # Replace the relative path to your weight file
@@ -24,7 +69,7 @@ st.set_page_config(
 with st.sidebar:
     st.header("Image/Video Config")  # Adding header to sidebar
     # Adding file uploader to sidebar for selecting videos
-    uploaded_file = st.file_uploader("Choose a video/image...", type=["mp4","mov","jpg"])
+    uploaded_file = st.file_uploader("Choose a video...", type=["mp4"])
     temporary_location = None
 
     if uploaded_file is not None:
@@ -95,28 +140,32 @@ selected = option_menu(
 )
 
 if selected == "HOME":
-    st.header("Upload the video/Image file and click on the start detection")
+    st.header("Upload the video file and click on the start detection")
 
     # If a video has been uploaded and detected, start object detection
     if st.session_state.video_uploaded:
-
+        vid_cap = cv2.VideoCapture(temporary_location)
         if det_type == "Street_Name" and st.sidebar.button('Start Detection'):
-            vid_cap = cv2.VideoCapture(temporary_location)
-
-            detected_text = main_func(vid_cap, model, confidence)
+            
+            most_common, model_inference_time, total_time, overhead_time, model_fps, total_fps = main_func(vid_cap, model, confidence)
 
             # Display the most common text
-            st.write("Most common text:", detected_text)
+            st.write("Most common text:", most_common)
 
-            audio_html = speak(detected_text)
+            # Display the performance metrics
+            st.write(f"Model Inference Time: {model_inference_time*1000:.2f}ms")
+            st.write(f"Total Time: {total_time*1000:.2f}ms")
+            st.write(f"Overhead Time: +{overhead_time*1000:.2f}ms")
+            st.write(f"Model FPS: {model_fps:.2f}fps")
+            st.write(f"Total FPS: {total_fps:.2f}fps")
+
+            audio_html = speak(most_common)
 
         if det_type == "Pedestrian" and st.sidebar.button('Start Detection'):
-            vid_cap = cv2.VideoCapture(temporary_location)
 
             main_func_ped(vid_cap, confidence, margin)
         
         if det_type == "Alert" and st.sidebar.button('Start Detection'):
-            vid_cap = cv2.VideoCapture(temporary_location)
             class_items = ['bicycle', 'car', 'motorcycle', 'bus', 'truck']
             assigned_numbers = [1, 2, 3, 5, 7]
 
