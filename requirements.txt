@@ -7,4 +7,5 @@ omegaconf
 Easyocr
 streamlit-option-menu
 firebase-admin
+pyrebase
 
