@@ -1,9 +1,12 @@
 import sqlite3
 import streamlit as st
+from PIL import Image
 from streamlit_option_menu import option_menu
 from ultralytics import YOLO
 import cv2
-from your_module import main_func, speak, main_func_ped, main_func_alert  # Import your functions here
+from object_det_app import *
+from Pedestrian import *
+from speed_modular import *
 
 # Establish a connection to the database
 conn = sqlite3.connect('my_database.sqlite3')
