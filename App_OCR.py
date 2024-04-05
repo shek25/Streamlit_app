@@ -6,61 +6,6 @@ import cv2
 from object_det_app import *
 from Pedestrian import *
 from speed_modular import *
-import pyrebase
-import requests
-
-
-# Streamlit app
-st.sidebar.title("Our Community App")
-
-# Authentication
-choice = st.sidebar.selectbox('Login/Signup', ['Login', 'Sign up'])
-
-email = st.sidebar.text_input('Please enter your email address')
-password = st.sidebar.text_input('Please enter your password', type='password')
-
-firebase_config = {'apiKey': "AIzaSyCHGqRo7Kqxpm4utKIQddOlKIsmC7R9WTI",
-    'authDomain': "third-eye-ed866.firebaseapp.com",
-    'projectId': "third-eye-ed866",
-    'databaseURL': "https://third-eye-ed866-default-rtdb.firebaseio.com/",
-    'storageBucket': "third-eye-ed866.appspot.com",
-    'messagingSenderId': "432801718461",
-    'appId': "1:432801718461:web:9de6394feefac3ca3817d4",
-    'measurementId': "G-0ZKHV63176"
-    # ... other config ...
-}
-
-if choice == 'Signup':
-    handle = st.sidebar.text_input("Enter your username", value='Default')
-    submit = st.sidebar.button('Create my account')
-    
-    if submit:
-        signup_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={firebase_config['apiKey']}"
-        user_details = {
-            'email': email,
-            'password': password,
-            'returnSecureToken': True,
-        }
-        response = requests.post(signup_url, data=user_details)
-        if response.ok:
-            user_info = response.json()
-            st.success('Your Account is created Successfully')
-            st.balloons()
-            # Here you would use Firebase Admin SDK to interact with your database
-            # db.child(user_info['localId']).child("Handle").set(handle)
-            # db.child(user_info['localId']).child("ID").set(user_info['localId'])
-            st.info('Login via login drop down')
-        else:
-            st.error('Error creating account.')
-
-# Ensure this is placed before any code that makes HTTPS requests
-# For example, before the import statement of your EasyOCR module
-
-
-# import requests
-# requests.packages.urllib3.disable_warnings()
-
-
 
 im = Image.open('eye.png')
 
@@ -152,12 +97,16 @@ selected = option_menu(
 if selected == "HOME":
     st.header("Upload the video file and click on the start detection")
 
+    vid_type = st.radio(
+        "Select If you want to see video",
+        ["Show-Video", "Hide-Video"])
+
     # If a video has been uploaded and detected, start object detection
     if st.session_state.video_uploaded:
         vid_cap = cv2.VideoCapture(temporary_location)
         if det_type == "Street_Name" and st.sidebar.button('Start Detection'):
             
-            most_common, model_inference_time, total_time, overhead_time, model_fps, total_fps = main_func(vid_cap, model, confidence)
+            most_common, model_inference_time, total_time, overhead_time, model_fps, total_fps = main_func(vid_cap, model, confidence, vid_type=vid_type)
 
             # Display the most common text
             st.write("Most common text:", most_common)
@@ -173,7 +122,7 @@ if selected == "HOME":
 
         if det_type == "Pedestrian" and st.sidebar.button('Start Detection'):
 
-            main_func_ped(vid_cap, confidence, margin)
+            main_func_ped(vid_cap, confidence, margin, vid_type=vid_type)
         
         if det_type == "Alert" and st.sidebar.button('Start Detection'):
             class_items = ['bicycle', 'car', 'motorcycle', 'bus', 'truck']
@@ -183,7 +132,7 @@ if selected == "HOME":
             item_to_number = dict(zip(class_items, assigned_numbers))
             class_no = item_to_number.get(class_type)
 
-            main_func_alert(vid_cap,user_conf_value=confidence, margin=margin, user_class_id=class_no, user_fps_value=FPS)
+            main_func_alert(vid_cap,user_conf_value=confidence, margin=margin, user_class_id=class_no, user_fps_value=FPS, vid_type=vid_type)
 
 
 if selected == "ABOUT":
